@@ -1,0 +1,116 @@
+TITULO:
+Loyalty Program | Status Mechanic Structure Review – Resumen Estratégico y Funcional
+
+FECHA:
+2026-05-27
+
+TIPO:
+Resumen ejecutivo / análisis funcional / alineamiento cross-departamental
+
+FUENTE:
+Documento “Loyalty Program | Status Mechanic Structure review”
+
+TAGS:
+#Loyalty
+#StatusMechanic
+#GUESS
+#EU
+#CRM
+#CustomerEngagement
+#Voucher
+#CrossBorder
+#LoyaltyProgram
+#StatusLevels
+#Rewards
+#MarketingStrategy
+#Retention
+#CustomerExperience
+
+RESUMEN_EJECUTIVO:
+La presentación describe la evolución del programa de fidelización GUESS Élite en Europa y la introducción de una nueva mecánica de status basada en niveles de gasto acumulado. El proyecto avanza por fases desde octubre de 2024 y busca consolidar una experiencia paneuropea unificada.
+
+El principal cambio estratégico es el lanzamiento del “Status Mechanic”, que clasifica a los clientes en cuatro niveles, Classic, Premium, Prestige y Ambassador, y desbloquea beneficios progresivos relacionados con descuentos, promociones, envío gratuito, acceso anticipado, concursos y experiencias exclusivas.
+
+El programa incorpora lógica cross-border para acumulación y redención de beneficios entre países europeos participantes. Además, se introducen nuevas mecánicas de engagement para incentivar registros, referrals y enriquecimiento de perfiles CRM.
+
+La segunda mitad del documento analiza resultados preliminares de activación y uso de vouchers en Italia, Polonia, España, Alemania y Austria, detectando mayor rendimiento del canal ecommerce frente a tiendas físicas y mejor comportamiento de vouchers de 15€ y 75€ frente a los de 35€.
+
+CONTEXTO_Y_PROBLEMA:
+Tras el lanzamiento inicial del Loyalty Program en Italia y Polonia en octubre de 2024, el programa se expandió en abril de 2025 a España, Alemania y Austria.
+
+El siguiente paso estratégico consiste en transformar el programa desde un modelo básico de acumulación y redención de puntos hacia una estructura más madura basada en status y beneficios diferenciales.
+
+Los principales retos identificados son mantener una experiencia consistente entre países europeos, incrementar engagement y recurrencia, incentivar mayor interacción con el programa, mejorar el valor percibido del loyalty, potenciar el uso de vouchers, aumentar activación en canales físicos y diferenciar clientes de alto valor mediante perks exclusivos.
+
+SOLUCION_PROPUESTA:
+Introducir un sistema de niveles loyalty basado en gasto acumulado histórico con cuatro status, Classic, Premium, Prestige y Ambassador, cada uno con beneficios progresivos. Añadir lógica cross-country de acumulación y redención y nuevas mecánicas de engagement como welcome bonus, profile enrichment y member get member.
+
+DECISIONES_TOMADAS:
+- Implementar una arquitectura de loyalty paneuropea
+- Permitir acumulación y redención de beneficios entre países
+- Centralizar el modelo de status a nivel europeo
+- Introducir un sistema progresivo de beneficios por nivel
+- Utilizar gasto acumulado como base de cálculo de status
+- Mantener un modelo híbrido entre earn and burn, engagement activities y status rewards
+- Priorizar ecommerce como canal principal de uso de beneficios
+- Mantener políticas locales específicas cuando sea necesario
+
+PASOS_DE_IMPLEMENTACION:
+1. Soft launch en Italia y Polonia
+2. Validación técnica y funcional del programa
+3. Expansión a España, Alemania y Austria
+4. Optimización de experiencia y herramientas
+5. Lanzamiento del branding GUESS Élite
+6. Activación de Status Mechanic
+7. Asignación automática de status según gasto histórico
+8. Activación de rewards por tier
+9. Análisis inicial de comportamiento de vouchers
+10. Preparación para expansión futura a más países
+
+SNIPPETS_DE_CODIGO:
+No aplica.
+
+RIESGOS_O_ADVERTENCIAS:
+- Bajo rendimiento de vouchers de 35€ respecto a otros valores
+- Menor adopción en Factory y FSS frente a ecommerce
+- Posible complejidad operativa derivada del modelo cross-country
+- Necesidad de sincronización consistente entre mercados
+- Riesgo de inconsistencia en políticas locales
+- Posible dificultad para comunicar claramente diferencias entre status
+- Necesidad de mantener coherencia CRM y Loyalty Data entre países
+- No se detalla la lógica técnica de cálculo, sincronización de status, expiración de puntos, gestión de edge cases, reglas de downgrade o reconciliación
+
+BUENAS_PRACTICAS:
+- Implementar experiencias loyalty homogéneas entre mercados
+- Diseñar beneficios progresivos y fácilmente entendibles
+- Incentivar enriquecimiento de perfiles CRM mediante rewards
+- Utilizar referral mechanics para adquisición orgánica
+- Mantener separación clara entre rewards transaccionales, engagement rewards y status benefits
+- Medir uso de vouchers por país, canal, valor, activación y redención
+- Analizar continuamente diferencias entre ecommerce y retail físico
+- Introducir perks aspiracionales para clientes high-value
+- Utilizar fases progresivas de rollout europeo
+- Mantener flexibilidad para excepciones locales
+
+ARCHIVOS_SUGERIDOS:
+- summaries/2026-05-27-loyalty-status-mechanic-structure-review-summary.md
+- decisions/2026-05-27-decision-eu-loyalty-status-mechanic-model.md
+- architecture/loyalty/2026-05-27-eu-cross-border-loyalty-model.md
+- analysis/loyalty/2026-05-27-voucher-usage-country-analysis.md
+- strategy/loyalty/2026-05-27-guess-elite-evolution-roadmap.md
+- meetings/loyalty/2026-05-27-cross-department-alignment-notes.md
+
+REFERENCIAS:
+- Loyalty Program | Status Mechanic Structure review
+- https://developer.salesforce.com/
+- https://help.salesforce.com/
+- https://salesforce.stackexchange.com/
+- https://ampscript.guide/
+
+REFERENCIAS_PENDIENTES:
+- Documento funcional del cálculo técnico de status
+- Arquitectura técnica de sincronización cross-country
+- Definición funcional de expiración de puntos y downgrade
+- Reglas técnicas de accrual y redemption
+- Modelo de integración entre ecommerce, POS y loyalty
+- KPIs objetivo posteriores al lanzamiento del Status Mechanic
