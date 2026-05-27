@@ -1,0 +1,113 @@
+TITULO:
+Patrón SQL SFMC para simular estructura Service Cloud usando aliases con dos puntos
+
+FECHA:
+2026-05-27
+
+TIPO:
+Patrón reutilizable SQL / Convención arquitectónica SFMC
+
+FUENTE:
+Conversación interna MC Arquitecto
+
+TAGS:
+SFMC
+SQL
+Automation Studio
+Service Cloud
+Synchronized Data Extensions
+Aliases
+Query Activity
+Voucher
+Order
+Patrón reutilizable
+Arquitectura de datos
+
+RESUMEN_EJECUTIVO:
+Se identificó y validó un patrón funcional para simular estructuras relacionales tipo Service Cloud dentro de queries SQL de Marketing Cloud mediante aliases con formato jerárquico usando dos puntos. El problema original provenía de errores de sintaxis al utilizar aliases como "Order:Order_Contact__r:FirstName" sin encapsularlos correctamente. La solución validada consiste en encerrar los aliases entre corchetes [] y mantener el acceso estándar a tablas sincronizadas usando el esquema ent.[Tabla].
+
+CONTEXTO_Y_PROBLEMA:
+En Marketing Cloud se necesitaba construir una query que imitara la estructura de un Entry Source proveniente de Service Cloud, incluyendo nombres de campos jerárquicos como `Order:Order_Contact__r:FirstName`.
+
+La query original generaba el error: "Incorrect syntax near the keyword 'Order'".
+
+SOLUCION_PROPUESTA:
+Usar aliases con formato jerárquico simulando objetos Salesforce, encapsulados entre corchetes []. Mantener el acceso estándar a tablas sincronizadas como ent.[Voucher_Salesforce] y ent.[Order_Salesforce_4], y usar una subquery para recuperar únicamente la última order del contacto.
+
+DECISIONES_TOMADAS:
+- Mantener la nomenclatura tipo Service Cloud para facilitar compatibilidad conceptual con Entry Sources y modelos Salesforce
+- Usar aliases con ":" como estándar arquitectónico en este tipo de simulaciones
+- Encerrar siempre aliases complejos entre corchetes []
+- Mantener el prefijo ent. para tablas sincronizadas
+- Utilizar subquery con MAX(CreatedDate) para recuperar únicamente la order más reciente del contacto
+
+PASOS_DE_IMPLEMENTACION:
+1. Crear aliases con estructura jerárquica Salesforce
+2. Encerrar aliases entre corchetes []
+3. Mantener tablas sincronizadas con formato ent.[Tabla]
+4. Construir JOIN entre Voucher y Order mediante ContactId
+5. Añadir subquery correlacionada para seleccionar únicamente la última order
+6. Aplicar filtros funcionales de negocio como Voucher Issued y LoyaltyQualified = 1
+
+SNIPPETS_DE_CODIGO:
+[SNIPPET:sql]
+SELECT
+o.Customer_First_Name__c AS [Order:Order_Contact__r:FirstName],
+o.Customer_Last_Name__c AS [Order:Order_Contact__r:LastName],
+o.Id AS [Order:Id],
+o.CreatedDate AS [Order:CreatedDate],
+o.LoyaltyQualified__c AS [Order:LoyaltyQualified__c],
+o.Origin_Channel__c AS [Order:Origin__c],
+o.Status AS [Order:Status],
+o.Customer_Email__c AS [Order:Order_Contact__r:Email],
+'False' AS [Order:Order_Contact__r:HasOptedOutOfEmail],
+'IT' AS [Order:Order_Contact__r:CommunicationCountry__c],
+'it' AS [Order:Order_Contact__r:Preferred_Language__c],
+'True' AS [Order:Order_Contact__r:Contactable_Email__c],
+v.ContactId AS [ContactID],
+v.Status AS [Estado],
+v.Id AS [VoucherId],
+o.Store__c AS [StoreId]
+FROM ent.[Voucher_Salesforce] v
+INNER JOIN ent.[Order_Salesforce_4] o
+ON o.Order_Contact__c = v.ContactId
+WHERE
+v.Status = 'Issued'
+AND o.CreatedDate = (
+SELECT MAX(o2.CreatedDate)
+FROM ent.[Order_Salesforce_4] o2
+WHERE o2.Order_Contact__c = o.Order_Contact__c
+)
+AND o.LoyaltyQualified__c = '1'
+[/SNIPPET]
+
+RIESGOS_O_ADVERTENCIAS:
+- Los aliases con ":" fallan si no están encapsulados entre []
+- "Order" es palabra reservada SQL y puede provocar errores si se usa incorrectamente
+- Este patrón debe validarse en herramientas externas si se reutiliza fuera de Query Activities de SFMC
+- Las subqueries correlacionadas con MAX() pueden impactar rendimiento en tablas grandes
+- Si existen múltiples orders con el mismo CreatedDate, podrían aparecer duplicados
+
+BUENAS_PRACTICAS:
+- Encerrar siempre aliases complejos entre []
+- Mantener consistencia visual con modelos Salesforce
+- Aplicar filtros de reducción de dataset antes de subqueries complejas
+- Revisar posibles duplicados en relaciones Contact → Order
+- Mantener nomenclatura estable entre SQL, Journey Builder y AMPscript
+
+ARCHIVOS_SUGERIDOS:
+- summaries/2026-05-27-sfmc-service-cloud-alias-pattern-summary.md
+- decisions/2026-05-27-decision-use-service-cloud-style-aliases-in-sfmc.md
+- patterns/2026-05-27-pattern-sfmc-service-cloud-aliases.md
+- snippets/2026-05-27-sql-voucher-order-service-cloud-simulation.md
+- playbooks/2026-05-27-sfmc-query-alias-conventions.md
+
+REFERENCIAS:
+- https://developer.salesforce.com/
+- https://help.salesforce.com/
+- https://salesforce.stackexchange.com/
+- https://ampscript.guide/
+
+REFERENCIAS_PENDIENTES:
+- Validar límites oficiales de caracteres y compatibilidad completa de aliases complejos en Query Studio vs Automation Studio
+- Validar impacto de rendimiento de aliases complejos y subqueries correlacionadas en datasets masivos SFMC
