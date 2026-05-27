@@ -2,43 +2,55 @@
 
 Usa este prompt al final de una conversación que quieras convertir en conocimiento reusable.
 
-## Prompt base
+## Recomendación
+
+Para copiar y pegar con menos pérdidas, usa un formato de salida en texto estructurado, no una respuesta libre. Eso reduce errores al copiar bloques, enlaces o snippets.
+
+## Prompt base, robusto para copiar
 
 ```txt
 Quiero que conviertas esta conversación en un paquete de conocimiento portable para mi biblioteca "MC Arquitecto".
 
-Devuélveme la respuesta en español y en formato Markdown, con estas secciones exactas:
+Devuélveme la respuesta en español, en TEXTO PLANO estructurado, sin tablas, sin numeración automática y sin adornos. Usa exactamente estas claves en mayúsculas y en este orden:
 
-1. Titulo
-2. Fecha
-3. Resumen ejecutivo
-4. Contexto y problema
-5. Solución propuesta
-6. Decisiones tomadas
-7. Pasos de implementación
-8. Snippets de código
-9. Riesgos, límites o advertencias
-10. Buenas prácticas
-11. Tags sugeridos
-12. Archivos sugeridos en mi repositorio
+TITULO:
+FECHA:
+TIPO:
+FUENTE:
+TAGS:
+
+RESUMEN_EJECUTIVO:
+CONTEXTO_Y_PROBLEMA:
+SOLUCION_PROPUESTA:
+DECISIONES_TOMADAS:
+PASOS_DE_IMPLEMENTACION:
+SNIPPETS_DE_CODIGO:
+RIESGOS_O_ADVERTENCIAS:
+BUENAS_PRACTICAS:
+ARCHIVOS_SUGERIDOS:
+REFERENCIAS:
+REFERENCIAS_PENDIENTES:
 
 Reglas:
 - No repitas toda la conversación, destila solo lo útil.
-- Si hay varias alternativas, sepáralas claramente.
-- Si hay código, entrégalo en bloques Markdown con lenguaje.
-- Si faltan datos, indícalo explícitamente.
-- En "Archivos sugeridos en mi repositorio", indica en qué carpeta debería guardarse cada parte, por ejemplo:
-  - summaries/...
-  - decisions/...
-  - patterns/...
-  - snippets/...
-  - playbooks/...
+- Si hay varias alternativas, sepáralas con guiones simples.
+- Si hay código, envuélvelo con marcadores literales [SNIPPET:lenguaje] y [/SNIPPET].
+- Si hay enlaces o nombres de documentos, no los resumas ni los reformatees.
+- Si falta una referencia, escríbela en REFERENCIAS_PENDIENTES.
+- En ARCHIVOS_SUGERIDOS, devuelve rutas concretas de archivo.
 - Si detectas un patrón reutilizable, sepáralo de la solución concreta.
 - Si detectas una decisión arquitectónica, añádela aunque no se haya dicho con esas palabras.
+- No uses Markdown salvo dentro de snippets si es imprescindible.
 ```
 
 ## Variante corta
 
 ```txt
-Destila este chat para mi biblioteca "MC Arquitecto" en Markdown. Extrae resumen, decisiones, patrón reutilizable, pasos, snippets, riesgos y tags. Indica también en qué archivos/carpeta debería guardarlo dentro del repositorio.
+Destila este chat para mi biblioteca "MC Arquitecto" en texto plano estructurado. Usa las claves TITULO, FECHA, RESUMEN_EJECUTIVO, CONTEXTO_Y_PROBLEMA, SOLUCION_PROPUESTA, DECISIONES_TOMADAS, PASOS_DE_IMPLEMENTACION, SNIPPETS_DE_CODIGO, RIESGOS_O_ADVERTENCIAS, BUENAS_PRACTICAS, ARCHIVOS_SUGERIDOS, REFERENCIAS y REFERENCIAS_PENDIENTES. Si hay código, usa [SNIPPET:lenguaje].
 ```
+
+## Después de copiar
+
+- Si la salida viene ya muy limpia, guárdala en `inbox/chatgpt-export/`
+- Si faltan referencias o ves texto raro, guárdala igualmente y marca lo pendiente
+- Yo me encargo de convertirla a Markdown canónico y de recolocar piezas si están en la carpeta equivocada

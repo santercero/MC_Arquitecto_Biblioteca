@@ -1,0 +1,71 @@
+TITULO: ClaimRow en Salesforce Marketing Cloud: asignación segura de cupones únicos, problemas reales y patrón reutilizable
+FECHA: 2026-05-27
+TIPO: chat-export
+FUENTE: chatgpt-project-mc-arquitecto
+TAGS: sfmc, amscript, claimrow, coupons, transactional-logic, runtime-issues, concurrency, marketing-cloud
+
+RESUMEN_EJECUTIVO:
+Se realizó un análisis y depuración completa de un proceso de asignación de cupones mediante ClaimRow() en AMPscript dentro de Salesforce Marketing Cloud.
+Durante las pruebas aparecieron varios problemas relevantes: uso incorrecto de UpdateDE(), confusión entre RowSet y DataRow, ejecuciones múltiples inesperadas del bloque AMPscript, asignación duplicada de cupones, comportamiento inconsistente de Now() y diferencias entre documentación teórica y comportamiento efectivo en runtime.
+La conclusión principal es que la forma más estable y segura de usar ClaimRow() es realizar toda la actualización necesaria directamente dentro de la propia llamada a ClaimRow, evitando UpdateDE, InsertDE y modificaciones posteriores.
+
+CONTEXTO_Y_PROBLEMA:
+Objetivo: asignar un único cupón por cliente cuando recibe un email.
+Condiciones: un cupón por envío, un cupón único por customer, registrar CUSTOMER_ID y CLAIMED_DATE, evitar duplicados y ser compatible con la Business Unit local.
+
+SOLUCION_PROPUESTA:
+Tratar ClaimRow() como una operación atómica única que selecciona, bloquea y actualiza el registro dentro de la misma llamada.
+
+DECISIONES_TOMADAS:
+- Evitar UpdateDE() tras ClaimRow()
+- Usar CLAIMED_DATE como Text
+- No usar logging separado inicialmente
+
+PASOS_DE_IMPLEMENTACION:
+1. Crear DE de cupones con campos COUPON_CODE, IS_CLAIMED, CUSTOMER_ID y CLAIMED_DATE
+2. Insertar cupones disponibles con IS_CLAIMED = False
+3. Implementar AMPscript con ClaimRow() incluyendo customer y fecha en la propia llamada
+4. Validar unicidad, no duplicados, fecha correcta y fallback sin stock
+
+SNIPPETS_DE_CODIGO:
+[SNIPPET:ampscript]
+%%[
+SET @customerId = AttributeValue("CUSTOMER_ID")
+SET @now = FormatDate(DateAdd(Now(), 2, "H"), "yyyy-MM-dd HH:mm:ss")
+
+SET @row = ClaimRow(
+ "TEST - DE - We Miss You FUS Coupons",
+ "IS_CLAIMED",
+ "CUSTOMER_ID", @customerId,
+ "CLAIMED_DATE", @now
+)
+
+IF NOT Empty(@row) THEN
+ SET @couponCode = Field(@row, "COUPON_CODE")
+ELSE
+ SET @couponCode = "SIN CUPÓN"
+ENDIF
+]%%
+[/SNIPPET]
+
+RIESGOS_O_ADVERTENCIAS:
+- Now() puede cachearse en preview, test sends o algunos envíos batch
+- ClaimRow() puede devolver DataRow o RowSet según parámetros usados
+- ClaimRow() puede ejecutarse múltiples veces aunque el email parezca único
+- UpdateDE() es confuso y poco fiable para este patrón
+
+BUENAS_PRACTICAS:
+- Hacer toda la operación dentro de ClaimRow()
+- Usar fechas Text en lugar de Date para tracking simple
+- Validar con Empty()
+- No confiar en preview para validar comportamiento runtime
+
+ARCHIVOS_SUGERIDOS:
+- summaries/2026-05-27-claimrow-coupon-assignment-summary.md
+- decisions/2026-05-27-decision-use-claimrow-as-atomic-operation.md
+- patterns/2026-05-27-pattern-claimrow-single-coupon-assignment.md
+- snippets/2026-05-27-ampscript-claimrow-coupon-assignment.md
+- playbooks/2026-05-27-debugging-claimrow-runtime-issues.md
+
+REFERENCIAS_PENDIENTES:
+- Falta la referencia adicional mencionada al final de la exportación original
