@@ -1,0 +1,175 @@
+TITULO:
+Refactorización y hardening del script SSJS "SMS Opt Out Azure Transac" para integración Azure API en SFMC NA
+
+FECHA:
+2026-05-27
+
+TIPO:
+Arquitectura técnica / Debugging / Hardening SSJS / Integración API
+
+FUENTE:
+Conversación técnica interna
+Script SSJS productivo NA
+Documentación oficial Salesforce
+https://ampscript.guide/
+https://developer.salesforce.com/
+https://help.salesforce.com/
+https://salesforce.stackexchange.com/
+
+TAGS:
+SFMC
+SSJS
+Automation Studio
+Azure
+API Integration
+SMS
+OptOut
+NorthAmerica
+ErrorHandling
+JSON
+Logging
+OAuth
+Production
+Security
+PayloadValidation
+Transactional
+Hardening
+Debugging
+
+RESUMEN_EJECUTIVO:
+Se documenta la evolución del script SSJS "SSJS - SMS Opt Out Azure Transac" utilizado en producción en Norteamérica para procesar opt-outs SMS mediante integración API con Azure.
+
+El script original presentaba errores de ejecución derivados principalmente de falta de validación de CUSTOMER_ID, construcción manual insegura del JSON, logging insuficiente, baja visibilidad de ejecución y manejo incompleto de errores.
+
+La versión corregida implementa validación estricta de registros, construcción segura del payload usando arrays y join(), logging granular y estructurado, mayor trazabilidad mediante Write() y try/catch específicos por bloque crítico.
+
+CONTEXTO_Y_PROBLEMA:
+El proceso obtiene registros desde la Data Extension `DE_SMSStopTransac`, autentica contra Azure AD usando OAuth2 client_credentials, genera un bearer token, construye un payload JSON y envía los registros a `https://guessincnaprodapim.azure-api.net/CustomersNA/api/validation/phone-reply`.
+
+El script original fallaba intermitentemente por registros con CUSTOMER_ID vacío y por construcción manual del JSON concatenando strings dentro del loop. Esto producía payloads inválidos, errores ocultos y baja trazabilidad.
+
+SOLUCION_PROPUESTA:
+Refactorizar el flujo SSJS manteniendo la lógica funcional original pero endureciendo validación, logging, construcción JSON, control de errores y trazabilidad.
+
+DECISIONES_TOMADAS:
+- Ignorar registros con CUSTOMER_ID vacío
+- No detener el procesamiento global por registros inválidos
+- Construir JSON usando arrays + join(',')
+- Mantener OAuth client_credentials
+- Mantener procesamiento batch único por ejecución
+- Centralizar logs en DE_smsLog
+- Añadir logging incluso para errores de logging
+- Mantener Write() visibles para troubleshooting operativo
+- Mantener status específicos por escenario
+- Priorizar robustez y trazabilidad frente a simplicidad
+
+PASOS_DE_IMPLEMENTACION:
+1. Revisar payload generado por el script original
+2. Detectar registros inválidos en DE_SMSStopTransac
+3. Identificar CUSTOMER_ID vacíos
+4. Refactorizar construcción JSON
+5. Sustituir concatenación manual por payloadArray.join(',')
+6. Añadir validación null, undefined, empty string y trim()
+7. Añadir logging estructurado
+8. Añadir Write() operacionales
+9. Añadir manejo granular de errores
+10. Registrar errores específicos de autenticación, ejecución, respuesta API y logging
+11. Validar respuestas accepted/rejected de API
+12. Desplegar en producción NA y verificar funcionamiento operativo
+
+SNIPPETS_DE_CODIGO:
+[SNIPPET:javascript]
+if (customerId && customerId.trim() !== "") {
+payloadArray.push(payloadObject);
+} else {
+logsDE.Rows.Add({
+contactkey: phoneNumber,
+eventDate: Now(),
+type: 'OptOut - Transac',
+status: 'CUSTOMER_ID vacío'
+});
+}
+[/SNIPPET]
+
+[SNIPPET:javascript]
+var payloadArray = [];
+
+payloadArray.push(payloadObject);
+
+var payLoadRoot =
+'{ "PhoneValidationReplies": [' +
+payloadArray.join(',') +
+'] }';
+[/SNIPPET]
+
+[SNIPPET:javascript]
+try {
+logsDE.Rows.Add({
+contactkey: accepted[a],
+eventDate: Now(),
+type: 'OptOut - Transac',
+status: 'ACCEPTED_BY_API'
+});
+} catch (logEx) {
+Write("<br>Error logging ACCEPTED_BY_API: " + Stringify(logEx));
+}
+[/SNIPPET]
+
+[SNIPPET:javascript]
+if (statusCode === 202) {
+var response = Platform.Function.ParseJSON(result.Response[0]);
+var accepted = response.accepted;
+var rejected = response.rejected;
+}
+[/SNIPPET]
+
+RIESGOS_O_ADVERTENCIAS:
+- El client_secret sigue hardcodeado en el script
+- HTTP.Post no implementa retry automático
+- Posible timeout si aumenta mucho el volumen de registros
+- Retrieve() sin filtro puede impactar rendimiento
+- El payload final sigue construyéndose manualmente como string JSON
+- No existe paginación
+- No existe control de concurrencia
+- No se marca Processed en la DE
+- Riesgo de reprocesamiento si falla parcialmente
+- Write() excesivos pueden dificultar lectura en ejecuciones masivas
+
+BUENAS_PRACTICAS:
+- Validar siempre claves funcionales antes de construir payloads
+- Nunca concatenar JSON manualmente dentro de loops complejos
+- Usar arrays + join() para payloads JSON
+- Añadir logs específicos por tipo de error
+- Capturar también errores de logging
+- Añadir Write() durante fase de estabilización
+- Separar autenticación y ejecución API en bloques independientes
+- Registrar statusCode y body de respuestas no exitosas
+- Evitar depender de Rows.length sin validar Rows
+- Añadir controles null, undefined, empty y trim()
+- Priorizar resiliencia parcial, los registros inválidos no deben bloquear el batch completo
+
+ARCHIVOS_SUGERIDOS:
+- summaries/2026-05-27-sms-optout-azure-hardening-summary.md
+- decisions/2026-05-27-decision-resilient-batch-processing-optout-flow.md
+- patterns/2026-05-27-pattern-ssjs-api-integration-hardening.md
+- patterns/2026-05-27-pattern-safe-json-construction-in-ssjs.md
+- snippets/2026-05-27-ssjs-oauth-client-credentials-sfmc.md
+- snippets/2026-05-27-ssjs-safe-json-array-builder.md
+- snippets/2026-05-27-ssjs-logging-pattern-sfmc.md
+- playbooks/2026-05-27-sfmc-api-integration-debugging.md
+- integrations/azure/2026-05-27-sms-optout-na-architecture.md
+
+REFERENCIAS:
+- https://ampscript.guide/
+- https://developer.salesforce.com/
+- https://help.salesforce.com/
+- https://salesforce.stackexchange.com/
+- https://login.microsoftonline.com/
+- https://guessincnaprodapim.azure-api.net/CustomersNA/api/validation/phone-reply
+
+REFERENCIAS_PENDIENTES:
+- Documentación oficial Salesforce sobre mejores prácticas SSJS HTTP.Post
+- Documentación oficial Salesforce sobre gestión segura de secretos en SSJS
+- Definición oficial del contrato API Azure phone-reply
+- Estrategia futura de secret management (Key Vault o external vault)
+- Política oficial de retry y reprocesamiento para integraciones transaccionales SMS
